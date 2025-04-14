@@ -130,7 +130,8 @@ namespace MGSC
                 AnimationMode.SampleAnimationClip(_tempInstance, clip, frameTime);
 
                 var meshFilters = _tempInstance.GetComponentsInChildren<MeshFilter>();
-                var combineInstances = new CombineInstance[meshFilters.Length];
+                var skinnedMeshRenderers = _tempInstance.GetComponentsInChildren<SkinnedMeshRenderer>();
+                var combineInstances = new List<CombineInstance>(meshFilters.Length + skinnedMeshRenderers.Length);
                 var bonePositions = new Dictionary<string, BoneTransformData>();
 
                 foreach (var bone in _tempInstance.GetComponentsInChildren<Bone>())
@@ -147,15 +148,33 @@ namespace MGSC
                     }
                 }
 
+                for (var i = 0; i < skinnedMeshRenderers.Length; i++)
+                {
+                    var combinedInstance = new CombineInstance();
+                    var skinnedMeshRenderer = skinnedMeshRenderers[i];
+                    var mesh = new Mesh();
+
+                    skinnedMeshRenderer.BakeMesh(mesh);
+
+                    combinedInstance.mesh = mesh;
+                    combinedInstance.transform = skinnedMeshRenderer.transform.localToWorldMatrix;
+                    
+                    combineInstances.Add(combinedInstance);
+                }
+
                 for (var i = 0; i < meshFilters.Length; i++)
                 {
+                    var combinedInstance = new CombineInstance();
                     var meshFilter = meshFilters[i];
-                    combineInstances[i].mesh = meshFilter.sharedMesh;
-                    combineInstances[i].transform = meshFilter.transform.localToWorldMatrix;
+
+                    combinedInstance.mesh = meshFilter.sharedMesh;
+                    combinedInstance.transform = meshFilter.transform.localToWorldMatrix;
+                    
+                    combineInstances.Add(combinedInstance);
                 }
 
                 Mesh combinedMesh = new();
-                combinedMesh.CombineMeshes(combineInstances, true, true);
+                combinedMesh.CombineMeshes(combineInstances.ToArray(), true, true);
                 
                 return new MeshFrameData
                 {
