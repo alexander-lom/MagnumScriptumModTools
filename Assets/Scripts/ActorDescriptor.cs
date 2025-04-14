@@ -41,6 +41,7 @@ namespace MGSC
         [SerializeField] private Sprite _inventoryDummyLinesSprite;
         
         [SerializeField] private LiquidType _blood = LiquidType.Red;
+        [SerializeField] private bool _deathDissolveEffect;
         [SerializeField] private bool _putCorpse = true;
         [SerializeField] private bool _putBlood = true;
         [SerializeField] private bool _putBloodCorners;
@@ -68,6 +69,7 @@ namespace MGSC
         public Sprite InventoryDummyLinesSprite => _inventoryDummyLinesSprite;
         
         public LiquidType Blood => _blood;
+        public bool DeathDissolveEffect => _deathDissolveEffect;
         public bool PutCorpse => _putCorpse;
         public bool PutBlood => _putBlood;
         public bool PutBloodCorners => _putBloodCorners;
@@ -85,5 +87,11 @@ namespace MGSC
 
         // TODO: TEMPORARY WORKAROUND
         public PackedActorMesh LoadedMesh;
+
+        public void ClearNoneBuildData()
+        {
+            _animationSets.Clear();
+            _creature3dModel = null;
+        }
     }
 }
